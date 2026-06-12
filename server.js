@@ -10,6 +10,9 @@ const dataFile = join(dataDir, "submissions.jsonl");
 
 const PORT = Number(process.env.PORT || 3000);
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || "change-me";
+const SUPABASE_URL = (process.env.SUPABASE_URL || "").replace(/\/+$/, "");
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+const useSupabase = Boolean(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY);
 
 const mimeTypes = {
   ".html": "text/html; charset=utf-8",
@@ -70,6 +73,13 @@ function formatChinaTime(value) {
 }
 
 async function loadSubmissions() {
+  if (useSupabase) {
+    const rows = await supabaseRequest(
+      "submissions?select=id,alumni_id,phone,created_at,user_agent,ip&order=id.asc"
+    );
+    return rows.map(mapSupabaseRow);
+  }
+
   try {
     const content = await fs.readFile(dataFile, "utf8");
     return content
@@ -80,6 +90,65 @@ async function loadSubmissions() {
     if (error.code === "ENOENT") return [];
     throw error;
   }
+}
+
+async function createSubmission(row) {
+  if (useSupabase) {
+    const rows = await supabaseRequest(
+      "submissions?select=id,alumni_id,phone,created_at,user_agent,ip",
+      {
+        method: "POST",
+        headers: { Prefer: "return=representation" },
+        body: JSON.stringify({
+          alumni_id: row.alumniId,
+          phone: row.phone,
+          user_agent: row.userAgent,
+          ip: row.ip
+        })
+      }
+    );
+    return mapSupabaseRow(rows[0]);
+  }
+
+  const existingRows = await loadSubmissions();
+  const savedRow = {
+    id: existingRows.length ? Math.max(...existingRows.map((item) => item.id || 0)) + 1 : 1,
+    ...row
+  };
+
+  await fs.appendFile(dataFile, `${JSON.stringify(savedRow)}\n`, "utf8");
+  return savedRow;
+}
+
+async function supabaseRequest(path, options = {}) {
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    ...options,
+    headers: {
+      apikey: SUPABASE_SERVICE_ROLE_KEY,
+      Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+      "Content-Type": "application/json",
+      ...options.headers
+    }
+  });
+
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(`Supabase request failed: ${response.status} ${detail}`);
+  }
+
+  if (response.status === 204) return null;
+  return response.json();
+}
+
+function mapSupabaseRow(row) {
+  return {
+    id: row.id,
+    alumniId: row.alumni_id,
+    phone: row.phone,
+    createdAt: row.created_at,
+    userAgent: row.user_agent || "",
+    ip: row.ip || ""
+  };
 }
 
 function validateSubmission(payload) {
@@ -207,17 +276,14 @@ const server = createServer(async (req, res) => {
         return;
       }
 
-      const existingRows = await loadSubmissions();
-      const row = {
-        id: existingRows.length ? Math.max(...existingRows.map((item) => item.id || 0)) + 1 : 1,
+      const row = await createSubmission({
         alumniId: validation.value.alumniId,
         phone: validation.value.phone,
         createdAt: new Date().toISOString(),
         userAgent: req.headers["user-agent"] || "",
         ip: getClientIp(req)
-      };
+      });
 
-      await fs.appendFile(dataFile, `${JSON.stringify(row)}\n`, "utf8");
       send(res, 201, { ok: true, id: row.id, time: formatChinaTime(row.createdAt) });
       return;
     }
@@ -274,4 +340,5 @@ const server = createServer(async (req, res) => {
 server.listen(PORT, () => {
   console.log(`Wukong member collector is running at http://localhost:${PORT}`);
   console.log(`Admin page: http://localhost:${PORT}/admin.html?token=${ADMIN_TOKEN}`);
+  console.log(`Storage: ${useSupabase ? "Supabase" : "local JSONL"}`);
 });
