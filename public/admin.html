@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>数据下载 - 悟空租车会员升级</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body class="admin-body">
+    <main class="admin-page">
+      <header class="admin-header">
+        <div>
+          <p>悟空租车</p>
+          <h1>会员升级数据</h1>
+        </div>
+        <div class="admin-actions">
+          <a id="downloadXls" class="admin-button" href="#">下载 Excel</a>
+          <a id="downloadCsv" class="admin-button secondary" href="#">下载 CSV</a>
+        </div>
+      </header>
+
+      <section class="admin-summary">
+        <div>
+          <span>提交总数</span>
+          <strong id="totalCount">0</strong>
+        </div>
+        <div>
+          <span>最近提交</span>
+          <strong id="latestTime">暂无</strong>
+        </div>
+      </section>
+
+      <section class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>序号</th>
+              <th>校友id</th>
+              <th>手机号</th>
+              <th>时间</th>
+            </tr>
+          </thead>
+          <tbody id="rows">
+            <tr>
+              <td colspan="4">加载中...</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+
+    <script src="/admin.js"></script>
+  </body>
+</html>
