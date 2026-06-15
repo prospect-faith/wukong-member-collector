@@ -3,6 +3,9 @@ const submitButton = document.querySelector("#submitButton");
 const message = document.querySelector("#formMessage");
 const successModal = document.querySelector("#successModal");
 const successClose = document.querySelector("#successClose");
+const successIcon = document.querySelector("#successIcon");
+const successTitle = document.querySelector("#successTitle");
+const successMessage = document.querySelector("#successMessage");
 const appConfig = window.WUKONG_COLLECTOR_CONFIG || {};
 
 function setMessage(text, type = "") {
@@ -10,10 +13,30 @@ function setMessage(text, type = "") {
   message.className = `form-message ${type}`.trim();
 }
 
-function showSuccessModal() {
+function showResultModal({ title, message, icon = "✓", type = "success" }) {
+  successTitle.textContent = title;
+  successMessage.textContent = message;
+  successIcon.textContent = icon;
+  successModal.classList.toggle("is-warning", type === "warning");
   successModal.hidden = false;
   document.body.classList.add("modal-open");
   successClose.focus();
+}
+
+function showSuccessModal() {
+  showResultModal({
+    title: "提交成功",
+    message: "会员升级信息已登记，请等待后续处理。"
+  });
+}
+
+function showDuplicateModal(message) {
+  showResultModal({
+    title: "请勿重复填写",
+    message,
+    icon: "!",
+    type: "warning"
+  });
 }
 
 function closeSuccessModal() {
@@ -53,6 +76,11 @@ form.addEventListener("submit", async (event) => {
   try {
     const result = await submitMemberInfo({ phone, alumniId });
 
+    if (result.duplicate) {
+      showDuplicateModal(result.message);
+      return;
+    }
+
     if (!result.ok) {
       throw new Error(result.message || "提交失败，请稍后再试");
     }
@@ -85,6 +113,15 @@ async function submitMemberInfo({ phone, alumniId }) {
     });
 
     if (!response.ok) {
+      const errorDetail = await readResponseError(response);
+      if (isDuplicateSubmission(response, errorDetail)) {
+        return {
+          ok: false,
+          duplicate: true,
+          message: getDuplicateMessage(errorDetail)
+        };
+      }
+
       return { ok: false, message: "提交失败，请稍后再试" };
     }
 
@@ -97,4 +134,30 @@ async function submitMemberInfo({ phone, alumniId }) {
     body: JSON.stringify({ phone, alumniId })
   });
   return response.json();
+}
+
+async function readResponseError(response) {
+  try {
+    return await response.json();
+  } catch {
+    return {};
+  }
+}
+
+function isDuplicateSubmission(response, errorDetail) {
+  return response.status === 409 || errorDetail.code === "23505";
+}
+
+function getDuplicateMessage(errorDetail) {
+  const detailText = `${errorDetail.message || ""} ${errorDetail.details || ""}`;
+
+  if (detailText.includes("submissions_phone_unique") || detailText.includes("(phone)=")) {
+    return "该手机号已收录，请勿重复填写";
+  }
+
+  if (detailText.includes("submissions_alumni_id_unique") || detailText.includes("(alumni_id)=")) {
+    return "该校友卡号已收录，请勿重复填写";
+  }
+
+  return "该手机号或校友卡号已收录，请勿重复填写";
 }

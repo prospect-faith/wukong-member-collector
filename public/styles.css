@@ -227,6 +227,10 @@ input {
   font-weight: 900;
 }
 
+.success-modal.is-warning .success-modal__icon {
+  background: linear-gradient(135deg, #c90b12, #f05a28);
+}
+
 .success-modal h2 {
   margin: 0 0 8px;
   color: #222;
