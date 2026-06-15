@@ -43,55 +43,21 @@ input {
 }
 
 .hero {
+  position: relative;
   min-height: 356px;
   text-align: center;
   color: #fff;
 }
 
-.brand-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 6px;
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.brand-name {
-  font-size: 28px;
-  line-height: 1;
-}
-
-.cloud-mark {
-  position: relative;
-  width: 62px;
-  height: 32px;
-  border: 5px solid rgba(232, 66, 45, 0.72);
-  border-top-color: transparent;
-  border-radius: 30px;
-}
-
-.cloud-mark::before,
-.cloud-mark::after {
-  content: "";
-  position: absolute;
-  top: 8px;
-  width: 16px;
-  height: 16px;
-  border: 5px solid rgba(232, 66, 45, 0.72);
-  border-radius: 50%;
-}
-
-.cloud-mark::before {
-  left: 14px;
-}
-
-.cloud-mark::after {
-  right: 10px;
+.brand-logo {
+  display: block;
+  width: clamp(132px, 38vw, 172px);
+  height: auto;
+  margin: 2px 0 0 10px;
 }
 
 .hero h1 {
-  margin: 22px 0 10px;
+  margin: 18px 0 10px;
   font-size: 30px;
   line-height: 1.25;
   letter-spacing: 0;
