@@ -74,6 +74,16 @@
       </section>
     </main>
 
+    <div class="success-modal" id="successModal" hidden>
+      <div class="success-modal__backdrop" data-close-success></div>
+      <div class="success-modal__panel" role="dialog" aria-modal="true" aria-labelledby="successTitle">
+        <div class="success-modal__icon" aria-hidden="true">✓</div>
+        <h2 id="successTitle">提交成功</h2>
+        <p>会员升级信息已登记，请等待后续处理。</p>
+        <button type="button" id="successClose">知道了</button>
+      </div>
+    </div>
+
     <script src="config.js"></script>
     <script src="main.js"></script>
   </body>

@@ -1,12 +1,32 @@
 const form = document.querySelector("#memberForm");
 const submitButton = document.querySelector("#submitButton");
 const message = document.querySelector("#formMessage");
+const successModal = document.querySelector("#successModal");
+const successClose = document.querySelector("#successClose");
 const appConfig = window.WUKONG_COLLECTOR_CONFIG || {};
 
 function setMessage(text, type = "") {
   message.textContent = text;
   message.className = `form-message ${type}`.trim();
 }
+
+function showSuccessModal() {
+  successModal.hidden = false;
+  document.body.classList.add("modal-open");
+  successClose.focus();
+}
+
+function closeSuccessModal() {
+  successModal.hidden = true;
+  document.body.classList.remove("modal-open");
+}
+
+successClose.addEventListener("click", closeSuccessModal);
+successModal.addEventListener("click", (event) => {
+  if (event.target.hasAttribute("data-close-success")) {
+    closeSuccessModal();
+  }
+});
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -38,7 +58,7 @@ form.addEventListener("submit", async (event) => {
     }
 
     form.reset();
-    setMessage("提交成功，会员升级信息已登记。", "success");
+    showSuccessModal();
   } catch (error) {
     setMessage(error.message || "提交失败，请稍后再试", "error");
   } finally {

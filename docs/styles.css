@@ -27,6 +27,10 @@ body {
   letter-spacing: 0;
 }
 
+body.modal-open {
+  overflow: hidden;
+}
+
 button,
 input {
   font: inherit;
@@ -179,6 +183,72 @@ input {
 
 .form-message.success {
   color: #167444;
+}
+
+.success-modal[hidden] {
+  display: none;
+}
+
+.success-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.success-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.success-modal__panel {
+  position: relative;
+  width: min(100%, 320px);
+  padding: 28px 22px 22px;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
+  text-align: center;
+}
+
+.success-modal__icon {
+  display: inline-grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  margin-bottom: 14px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #de1119, #f04438);
+  color: #fff;
+  font-size: 34px;
+  font-weight: 900;
+}
+
+.success-modal h2 {
+  margin: 0 0 8px;
+  color: #222;
+  font-size: 22px;
+}
+
+.success-modal p {
+  margin: 0 0 22px;
+  color: #666;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.success-modal button {
+  width: 100%;
+  min-height: 48px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #b8010d, #ec302d);
+  color: #fff;
+  font-size: 17px;
+  font-weight: 800;
 }
 
 .benefits {
